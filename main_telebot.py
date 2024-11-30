@@ -1,0 +1,73 @@
+from rsl_telebot.telebot_base import TeleBotBase
+from multiprocessing import Queue
+from rsl_telebot.telebot_commands import TelebotRequest, TelebotResponse, TelebotCommand
+import time
+from src.constants import ASSETS_PATH
+from src.exercise import SentProcessor, Exercise
+from src.files import Files
+from nltk.tokenize import sent_tokenize
+import os
+import random
+from src.constants import ui_texts
+
+connected_users = []
+telebot_api = '7828918234:AAHANMlaM2a2hBUyiL1b8k899N5Ho65yyDQ'
+telebot_name = 'rsl_exercise_teacher_helper_bot'
+commands = {"/help":"Help", "/start": 'Start'}
+choose_exercise_buttons = [{'command_text': 'синонимы', 'command_name': '/ex1'},
+                           {'command_text': 'антонимы', 'command_name': '/ex2'},
+                           {'command_text': 'составить предложение', 'command_name': '/ex3'},
+                           {'command_text': 'падежи', 'command_name': '/ex4'},
+                           {'command_text': 'грамматика', 'command_name': '/ex5'},
+                           {'command_text': 'лексика', 'command_name': '/ex6'}]
+choose_text_buttons = []
+textfiles = {}
+for index, name in enumerate(os.listdir(ASSETS_PATH.parent)):
+    if '.txt' in name:
+        textfiles[f'/file_{index}']=name
+        name = name.replace('.txt', '')
+        choose_text_buttons.append({'command_text': name, 'command_name': f'/file_{index}'})
+
+responseQueue = Queue()
+requestQueue = Queue()
+request = TelebotRequest()
+
+tb = TeleBotBase(telebot_name, telebot_api, connected_users, commands)
+           
+tb.start(responseQueue, requestQueue)
+
+started = True
+while started == True:
+    if requestQueue.qsize() > 0:
+        request = requestQueue.get()
+        if request.text == '/start':
+            if request.chat not in connected_users:
+                connected_users.append(request.chat)
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['start'], commands=choose_text_buttons))
+        
+        if request.text.startswith('/file'):
+            file = Files(textfiles[request.text])
+            text = file.read_file()
+            
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['chosen_text']+textfiles[request.text]))
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['choose_ex'], commands=choose_exercise_buttons))
+
+        if request.text.startswith('/ex'): 
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['ex_is_being_generated']))
+
+            sentences = sent_tokenize(text)
+            begin = random.randint(0, len(sentences)-5)
+            sent_to_process = sentences[begin:begin+5]
+
+            processed_sentences = []
+            for sent in sent_to_process:
+                processed_sent = SentProcessor(sent)
+                processed_sent.process_text()
+                processed_sentences.append(processed_sent)
+
+            exercise = Exercise(processed_sentences, number_of_sent_in_each_ex=3)
+            exercise.run_exercises([int(request.text.replace('/ex', ''))])
+            ex, answers = exercise.form_exercises()
+            responseQueue.put(TelebotResponse(chat= request.chat, text = f'{ex}\n\n{answers}'))
+           
+    time.sleep(0.5)
