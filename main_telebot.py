@@ -9,18 +9,20 @@ from nltk.tokenize import sent_tokenize
 import os
 import random
 from src.constants import ui_texts
+from src.sql_database import RSLmysql
 
 connected_users = []
 telebot_api = '7828918234:AAHANMlaM2a2hBUyiL1b8k899N5Ho65yyDQ'
 telebot_name = 'rsl_exercise_teacher_helper_bot'
-commands = {"/help":"Help", "/start": 'Start'}
+
+commands = {"/help":"Help", "/start": 'Start', '/mytext': 'Ввести свой текст'}
 choose_exercise_buttons = [{'command_text': 'синонимы', 'command_name': '/ex1'},
                            {'command_text': 'антонимы', 'command_name': '/ex2'},
                            {'command_text': 'составить предложение', 'command_name': '/ex3'},
                            {'command_text': 'падежи', 'command_name': '/ex4'},
                            {'command_text': 'грамматика', 'command_name': '/ex5'},
                            {'command_text': 'лексика', 'command_name': '/ex6'}]
-choose_text_buttons = []
+choose_text_buttons = [{'command_text': 'ввести свой текст', 'command_name': '/user_file'}]
 textfiles = {}
 for index, name in enumerate(os.listdir(ASSETS_PATH.parent)):
     if '.txt' in name:
@@ -31,6 +33,8 @@ for index, name in enumerate(os.listdir(ASSETS_PATH.parent)):
 responseQueue = Queue()
 requestQueue = Queue()
 request = TelebotRequest()
+
+rsl_db = RSLmysql(host="localhost", user="rsl_user", database="rsl_exgenerator", password="rsl24EX@g")
 
 tb = TeleBotBase(telebot_name, telebot_api, connected_users, commands)
            
@@ -49,7 +53,17 @@ while started == True:
             file = Files(textfiles[request.text])
             text = file.read_file()
             
-            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['chosen_text']+textfiles[request.text]))
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['chosen_text']))
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['choose_ex'], commands=choose_exercise_buttons))
+
+        if request.text == '/user_file':
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['get_user_text']))
+
+            #responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['choose_ex'], commands=choose_exercise_buttons))
+            #text = request.text
+
+        if request.text.startswith('/mytext'):
+            text = request.text
             responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['choose_ex'], commands=choose_exercise_buttons))
 
         if request.text.startswith('/ex'): 
