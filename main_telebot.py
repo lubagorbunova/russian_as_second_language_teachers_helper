@@ -15,6 +15,8 @@ connected_users = []
 telebot_api = '7828918234:AAHANMlaM2a2hBUyiL1b8k899N5Ho65yyDQ'
 telebot_name = 'rsl_exercise_teacher_helper_bot'
 
+rsl_db = RSLmysql(host="localhost", user="rsl_user", database="rsl_exgenerator", password="rsl24EX@g")
+
 commands = {"/help":"Help", "/start": 'Start', '/mytext': 'Ввести свой текст'}
 choose_exercise_buttons = [{'command_text': 'синонимы', 'command_name': '/ex1'},
                            {'command_text': 'антонимы', 'command_name': '/ex2'},
@@ -22,19 +24,24 @@ choose_exercise_buttons = [{'command_text': 'синонимы', 'command_name': 
                            {'command_text': 'падежи', 'command_name': '/ex4'},
                            {'command_text': 'грамматика', 'command_name': '/ex5'},
                            {'command_text': 'лексика', 'command_name': '/ex6'}]
-choose_text_buttons = [{'command_text': 'ввести свой текст', 'command_name': '/user_file'}]
+#choose_text_buttons = [{'command_text': 'ввести свой текст', 'command_name': '/user_file'}]
+#textfiles = {}
+#for index, name in enumerate(os.listdir(ASSETS_PATH.parent)):
+#    if '.txt' in name:
+#        textfiles[f'/file_{index}']=name
+#        name = name.replace('.txt', '')
+#        choose_text_buttons.append({'command_text': name, 'command_name': f'/file_{index}'})
+
+choose_text_buttons_from_db = [{'command_text': 'ввести свой текст', 'command_name': '/user_file'}]
 textfiles = {}
-for index, name in enumerate(os.listdir(ASSETS_PATH.parent)):
-    if '.txt' in name:
-        textfiles[f'/file_{index}']=name
-        name = name.replace('.txt', '')
-        choose_text_buttons.append({'command_text': name, 'command_name': f'/file_{index}'})
+texts = rsl_db.get_texts()
+for index, name in enumerate(texts.keys()):
+    textfiles[f'/file_{index}']=name
+    choose_text_buttons_from_db.append({'command_text': name, 'command_name': f'/file_{index}'})
 
 responseQueue = Queue()
 requestQueue = Queue()
 request = TelebotRequest()
-
-rsl_db = RSLmysql(host="localhost", user="rsl_user", database="rsl_exgenerator", password="rsl24EX@g")
 
 tb = TeleBotBase(telebot_name, telebot_api, connected_users, commands)
            
@@ -47,13 +54,15 @@ while started == True:
         if request.text == '/start':
             if request.chat not in connected_users:
                 connected_users.append(request.chat)
-            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['start'], commands=choose_text_buttons))
-        
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['start'], commands=choose_text_buttons_from_db))
+            #responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['start'], commands=choose_text_buttons))
+
         if request.text.startswith('/file'):
-            file = Files(textfiles[request.text])
-            text = file.read_file()
+            #file = Files(textfiles[request.text])
+            #text = file.read_file()
+            text = texts[textfiles[request.text]]
             
-            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['chosen_text']))
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['chosen_text']+textfiles[request.text]))
             responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['choose_ex'], commands=choose_exercise_buttons))
 
         if request.text == '/user_file':
@@ -70,7 +79,10 @@ while started == True:
             responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['ex_is_being_generated']))
 
             sentences = sent_tokenize(text)
-            begin = random.randint(0, len(sentences)-5)
+            if len(sentences)>5:
+                begin = random.randint(0, len(sentences)-5)
+            else:
+                begin = 0
             sent_to_process = sentences[begin:begin+5]
 
             processed_sentences = []
