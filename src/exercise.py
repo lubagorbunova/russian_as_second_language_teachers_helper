@@ -319,6 +319,9 @@ class Exercise:
         """
         Генерирует упражнение на выбор правильной формы слова.
         """
+        if len(self.processed_text)<5:
+            number_of_sent = len(self.processed_text)
+
         sentences = random.sample(self.processed_text, number_of_sent)
         full_text = '\nОтветы на задание №5: \n'
         text = '\nЗадание №5: Поставьте слово в скобках в правильную форму:\n'
@@ -359,6 +362,9 @@ class Exercise:
         """
         Генерирует упражнение на поиск коллокаций для предложенных слов.
         """
+        if len(self.processed_text)<5:
+            number_sent = len(self.processed_text)
+
         sentences = random.sample(self.processed_text, number_sent)
         full_text = '\nОтветы на задание №6:'
         text = '\nЗадание №6: Выберите одно или несколько слов из списка, которые подходят в предложение по смыслу.\nПоставьте слово в правильную форму.\n'
