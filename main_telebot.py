@@ -15,9 +15,7 @@ telebot_name = 'rsl_exercise_teacher_helper_bot'
 rsl_db = RSLmysql(host="localhost", user="rsl_user", database="rsl_exgenerator", password="rsl24EX@g")
 
 commands = {"/help":"Help", "/start": 'Start', '/mytext': 'Ввести свой текст'}
-choose_exercise_buttons = [{'command_text': 'синонимы', 'command_name': '/ex1'},
-                           {'command_text': 'антонимы', 'command_name': '/ex2'},
-                           {'command_text': 'составить предложение', 'command_name': '/ex3'},
+choose_exercise_buttons = [{'command_text': 'составить предложение', 'command_name': '/ex3'},
                            {'command_text': 'падежи', 'command_name': '/ex4'},
                            {'command_text': 'грамматика', 'command_name': '/ex5'},
                            {'command_text': 'лексика', 'command_name': '/ex6'}]
@@ -35,7 +33,8 @@ while started == True:
     if requestQueue.qsize() > 0:
         request = requestQueue.get()
 
-        choose_text_buttons_from_db = [{'command_text': 'ввести свой текст', 'command_name': '/user_file'}]
+        my_text_or_base = [{'command_text': 'свой текст', 'command_name': '/user_file'}, {'command_text': 'текст из базы', 'command_name': '/base_file'}]
+        choose_text_buttons_from_db = []
         textfiles = {}
         texts = rsl_db.get_texts(chat=request.chat)
         for index, name in enumerate(texts.keys()):
@@ -45,16 +44,28 @@ while started == True:
         if request.text == '/start':
             if request.chat not in connected_users:
                 connected_users.append(request.chat)
-            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['start'], commands=choose_text_buttons_from_db))
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['start'], commands=my_text_or_base))
 
         if request.text.startswith('/file'):
             text = texts[textfiles[request.text]]
             
             responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['chosen_text']+textfiles[request.text]))
             responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['choose_ex'], commands=choose_exercise_buttons))
+        
+        if request.text == '/choose_ex':
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['choose_ex'], commands=choose_exercise_buttons))
+        
+        if request.text == '/another_text':
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['more_texts'], commands=[{'command_text': 'да', 'command_name': '/start'}, {'command_text': 'нет', 'command_name': '/end'}]))
+        
+        if request.text == '/end':
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['end_text']))
 
         if request.text == '/user_file':
             responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['get_user_text']))
+        
+        if request.text == '/base_file':
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['get_base_text'], commands=choose_text_buttons_from_db))
 
         if request.text.startswith('/mytext'):
             text = request.text
@@ -67,6 +78,7 @@ while started == True:
             responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['choose_ex'], commands=choose_exercise_buttons))
 
         if request.text == '/dontsavetodb':
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['not_saved']))
             responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['choose_ex'], commands=choose_exercise_buttons))
 
 
@@ -90,5 +102,6 @@ while started == True:
             exercise.run_exercises([int(request.text.replace('/ex', ''))])
             ex, answers = exercise.form_exercises()
             responseQueue.put(TelebotResponse(chat= request.chat, text = f'{ex}\n\n{answers}'))
+            responseQueue.put(TelebotResponse(chat= request.chat, text = ui_texts['more_tasks'], commands=[{'command_text': 'да', 'command_name': '/choose_ex'}, {'command_text': 'нет', 'command_name': '/another_text'}]))
            
     time.sleep(0.5)
