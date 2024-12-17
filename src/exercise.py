@@ -368,7 +368,7 @@ class Exercise:
         sentences = random.sample(self.processed_text, number_sent)
         full_text = '\nОтветы на задание №6:'
         text = '\nЗадание №6: Выберите одно или несколько слов из списка, которые подходят в предложение по смыслу.\nПоставьте слово в правильную форму.\n'
-        path =  PROJECT_ROOT / 'src'/ 'navec_hudlit_v1_12B_500K_300d_100q.tar'
+        path = PROJECT_ROOT / 'src'/ 'navec_hudlit_v1_12B_500K_300d_100q.tar'
         navec = Navec.load(path)
 
         for sent in sentences:

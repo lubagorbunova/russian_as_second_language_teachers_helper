@@ -38,8 +38,6 @@ if __name__ == '__main__':
     telebot_name="MetaTteleBot"
     telebot_api="5219495110:AAE5zbY4G9Eeqqd1Gqo40qo-VivJgYblR1I"
 
-    #telebot_name="MetaTteleDebugBot"
-    #telebot_api="5432738304:AAFZ7F2lB4j-42RsWAiZcBcBV38FKhwUYhU"
     host="localhost"
     user="tradingview"
     password="Zse45tgB"

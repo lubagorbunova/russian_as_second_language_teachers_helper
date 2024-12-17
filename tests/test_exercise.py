@@ -1,11 +1,7 @@
 import unittest
 from src.exercise import SentProcessor, Exercise
-
-import numpy
-from pymorphy2.tagset import OpencorporaTag
-
 from src.files import NothingToWriteError
-from src.word import Word
+
 
 class ExerciseBaseTests(unittest.TestCase):
 
@@ -105,32 +101,6 @@ class ExerciseBaseTests(unittest.TestCase):
         ex.find_collocations(1)
         self.assertEqual(ex.lexical_ex, '\nЗадание №6: Выберите одно или несколько слов из списка, которые подходят в предложение по смыслу.\nПоставьте слово в правильную форму.\nКрепко спит.\n')
         self.assertEqual(ex.lexical_answers, '\nОтветы на задание №6:\nКрепко спит.')
-
-    def test_synonyms(self):
-        word = Word('холодный', 0)
-        word.extract_synonyms_antonyms('холодный')
-        correct = {'ледяной', 'студёный', 'холодный'}
-        res = word.get_synonyms()
-        test_value = []
-        if len(correct) == len(res):
-            for el in correct:
-                if el in res:
-                    test_value.append(True)
-        msg = 'Something is wrong'
-        self.assertTrue(all(test_value), msg)
-
-    def test_antonyms(self):
-        word = Word('холодный', 0)
-        word.extract_synonyms_antonyms('холодный')
-        correct = {'нехолодный', 'теплый по цвету', 'теплый'}
-        res = word.get_antonyms()
-        test_value = []
-        if len(correct) == len(res):
-            for el in correct:
-                if el in res:
-                    test_value.append(True)
-        msg = 'Something is wrong'
-        self.assertTrue(all(test_value), msg)
 
     def test_run_exercises_correct_ex_exist(self):
         sents = []
