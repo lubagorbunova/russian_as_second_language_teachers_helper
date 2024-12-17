@@ -108,7 +108,7 @@ class ExerciseBaseTests(unittest.TestCase):
         sent.process_text()
         sents.append(sent)
         ex = Exercise(sents, number_of_sent_in_each_ex=1)
-        ex.run_exercises([3, 6])
+        ex.run_exercises()
         value = False
         if (len(ex.compose_ex) != 0) and \
             (len(ex.compose_answers) != 0) and \
@@ -117,20 +117,6 @@ class ExerciseBaseTests(unittest.TestCase):
             value = True
         self.assertTrue(value, msg='Упражнения не сформированы')
 
-    def test_run_exercises_wrong_ex_run(self):
-        sents = []
-        sent = SentProcessor('Кошка спит.')
-        sent.process_text()
-        sents.append(sent)
-        ex = Exercise(sents, number_of_sent_in_each_ex=1)
-        ex.run_exercises()
-        value = False
-        if (len(ex.synonym_ex) == 0) and \
-                (len(ex.synonym_answers) == 0) and \
-                (len(ex.antonym_ex) == 0) and \
-                (len(ex.antonym_answers) == 0):
-            value = True
-        self.assertTrue(value, msg='Лишние упражнения сформированы')
 
     def test_form_exercises(self):
         sents = []
@@ -138,7 +124,7 @@ class ExerciseBaseTests(unittest.TestCase):
         sent.process_text()
         sents.append(sent)
         ex = Exercise(sents, number_of_sent_in_each_ex=1)
-        ex.run_exercises([3])
+        ex.run_exercises([1])
         exercises, answers = ex.form_exercises()
         self.assertEqual(exercises, '\nЗадание №1. Составьте предложение из слов '
                                     'и поставьте их в правильную форму:\n[кошка]\n')
