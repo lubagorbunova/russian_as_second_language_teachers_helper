@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "linguistic-exercise-generator"
+name = "rsl-exercise-generator"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
