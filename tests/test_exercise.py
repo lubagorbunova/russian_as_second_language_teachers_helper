@@ -23,7 +23,7 @@ class ExerciseBaseTests(unittest.TestCase):
         ex = Exercise(sents)
         ex.generate_scrambled_sentence()
         test_value = False
-        if ex.compose_ex == '\nЗадание 1. Составьте предложение из слов и поставьте их в правильную форму:\n[спать], [кошка]\n'\
+        if ex.compose_ex == '\nЗадание №1. Составьте предложение из слов и поставьте их в правильную форму:\n[спать], [кошка]\n'\
                 or ex.compose_ex == '\nЗадание №1. Составьте предложение из слов и поставьте их в правильную форму:\n[кошка], [спать]\n':
             test_value = True
         self.assertTrue(test_value, 'WRONG OPTIONS')
