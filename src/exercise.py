@@ -139,9 +139,7 @@ class Exercise:
         '''
         Объединяет все упражнения в один файл.
         '''
-        all_exercises = (self.synonym_ex +
-                         self.antonym_ex +
-                         self.compose_ex +
+        all_exercises = (self.compose_ex +
                          self.case_ex +
                          self.forms_ex +
                          self.lexical_ex)
