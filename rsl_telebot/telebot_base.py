@@ -1,12 +1,9 @@
 import telebot 
 from telebot import types
 from threading import Thread
-import os
 import sys
 import time
-import csv
-import pandas as pd
-from multiprocessing import Process, Queue
+from multiprocessing import Queue
 from rsl_telebot.telebot_commands import TelebotCommand, TelebotRequest, TelebotResponse
 from rsl_telebot.telebot_users import TelebotUser
 

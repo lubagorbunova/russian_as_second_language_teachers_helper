@@ -19,8 +19,6 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
     _telebot_name="MetaTteleBot"
     _telebot_api="5219495110:AAE5zbY4G9Eeqqd1Gqo40qo-VivJgYblR1I",
 
-    #_telebot_name="MetaTteleDebugBot"
-    #_telebot_api="5432738304:AAFZ7F2lB4j-42RsWAiZcBcBV38FKhwUYhU"
     _host="localhost"
     _user="tradingview"
     _password="Zse45tgB"
