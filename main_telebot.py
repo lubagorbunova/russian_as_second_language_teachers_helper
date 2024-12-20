@@ -70,7 +70,7 @@ while started:
             responseQueue.put(TelebotResponse(chat=request.chat, text=ui_texts['get_base_text'], commands=choose_text_buttons_from_db))
 
         if request.text.startswith('/mytext'):
-            text = request.text
+            text = request.text[7:]
             responseQueue.put(TelebotResponse(chat=request.chat, text=ui_texts['save_usertext'],
                                               commands=[{'command_text': 'Сохранить', 'command_name': '/savetodb'},
                                                         {'command_text': 'Не сохранять', 'command_name': '/dontsavetodb'}]))

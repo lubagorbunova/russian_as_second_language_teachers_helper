@@ -8,7 +8,6 @@ from pymorphy2 import MorphAnalyzer
 from navec import Navec
 
 from src.constants import most_frequent_nouns, PROJECT_ROOT
-from src.files import NothingToWriteError
 from src.sentence_processor import SentProcessor
 
 
@@ -27,6 +26,9 @@ class Exercise:
                       4: 'Выберите одно или несколько слов из списка, которые подходят в предложение по смыслу.\nПоставьте слово в правильную форму'}
 
     def beautiful_task(func):
+        """
+        декоратор, который создаёт красивый вывод задания и ответов
+        """
         def wrapper(self, *arg, **kw):
             ex, answ, ex_n, task = func(self, *arg, **kw)
             modified_result = f'\nЗадание №{ex_n}. {task}:\n{ex}\n\nОтветы на задание {ex_n}:\n{answ}\n'
@@ -58,7 +60,7 @@ class Exercise:
         lemmas = sentence.get_lemmas()
         random.shuffle(lemmas)
 
-        lemmatized_tokens = ', '.join(f'[{lemma}]' for lemma in lemmas)
+        lemmatized_tokens = ', '.join(lemma for lemma in lemmas)
         
         return lemmatized_tokens, sentence.get_raw_text(), ex_number, self.tasks[ex_number]
 
@@ -111,7 +113,10 @@ class Exercise:
         if len(self.processed_text) < 5:
             number_of_sent = len(self.processed_text)
 
-        sentences = random.sample(self.processed_text, number_of_sent)
+        sentences = []
+        for item in LimitedSequenceIterator(self.processed_text, number_of_sent):
+            sentences.append(item)
+        
         full_text = ''
         text = ''
 
@@ -155,7 +160,10 @@ class Exercise:
         if len(self.processed_text) < 5:
             number_sent = len(self.processed_text)
 
-        sentences = random.sample(self.processed_text, number_sent)
+        sentences = []
+        for item in LimitedSequenceIterator(self.processed_text, number_sent):
+            sentences.append(item)
+
         full_text = ''
         text = ''
         path = PROJECT_ROOT / 'src' / 'navec_hudlit_v1_12B_500K_300d_100q.tar'
@@ -204,3 +212,23 @@ class Exercise:
         self.lexical_ex = text
         self.lexical_answers = full_text
         return text, full_text, ex_number, self.tasks[ex_number]
+
+
+class LimitedSequenceIterator:
+    def __init__(self, sequence, limit):
+        self.sequence = sequence  
+        self.limit = limit        
+        self.index = 0           
+        self.count = 0 
+        self.step = len(sequence)//limit          
+
+    def __iter__(self):
+        return self  
+
+    def __next__(self):
+        if self.count >= self.limit or self.index >= len(self.sequence):
+            raise StopIteration  
+        value = self.sequence[self.index]
+        self.index += self.step
+        self.count += 1
+        return value
