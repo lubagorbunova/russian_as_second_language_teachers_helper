@@ -2,7 +2,8 @@ from rsl_telebot.telebot_base import TeleBotBase
 from multiprocessing import Queue
 from rsl_telebot.telebot_commands import TelebotRequest, TelebotResponse
 import time
-from src.exercise import SentProcessor, Exercise
+from src.exercise import Exercise
+from src.sentence_processor import SentProcessor
 from nltk.tokenize import sent_tokenize
 import random
 from src.constants import ui_texts
@@ -15,10 +16,10 @@ telebot_name = 'rsl_exercise_teacher_helper_bot'
 rsl_db = RSLmysql(host="localhost", user="rsl_user", database="rsl_exgenerator", password="rsl24EX@g")
 
 commands = {"/help": "Help", "/start": 'Start', '/mytext': 'Ввести свой текст'}
-choose_exercise_buttons = [{'command_text': 'составить предложение', 'command_name': '/ex3'},
-                           {'command_text': 'падежи', 'command_name': '/ex4'},
-                           {'command_text': 'грамматика', 'command_name': '/ex5'},
-                           {'command_text': 'лексика', 'command_name': '/ex6'}]
+choose_exercise_buttons = [{'command_text': 'составить предложение', 'command_name': '/ex1'},
+                           {'command_text': 'падежи', 'command_name': '/ex2'},
+                           {'command_text': 'грамматика', 'command_name': '/ex3'},
+                           {'command_text': 'лексика', 'command_name': '/ex4'}]
 
 responseQueue = Queue()
 requestQueue = Queue()

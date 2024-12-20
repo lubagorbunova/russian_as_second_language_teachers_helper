@@ -1,6 +1,9 @@
 import pymysql
 
 class RSLmysql():
+    """
+    класс для работы бота с базой данных
+    """
     def __init__(self, host, user, database, password):
         self.host = host
         self.user = user
