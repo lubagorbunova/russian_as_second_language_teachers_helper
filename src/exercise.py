@@ -238,4 +238,3 @@ class LimitedSequenceIterator:
         self.count += 1
         return value
     
-

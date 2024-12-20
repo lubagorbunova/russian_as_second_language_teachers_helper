@@ -67,7 +67,8 @@ while started:
             responseQueue.put(TelebotResponse(chat=request.chat, text=ui_texts['get_user_text']))
         
         if request.text == '/base_file':
-            responseQueue.put(TelebotResponse(chat=request.chat, text=ui_texts['get_base_text'], commands=choose_text_buttons_from_db))
+            responseQueue.put(TelebotResponse(chat=request.chat, text=ui_texts['get_base_text']))
+            responseQueue.put(TelebotResponse(chat=request.chat, text=ui_texts['choose'], commands=choose_text_buttons_from_db))
 
         if request.text.startswith('/mytext'):
             text = request.text[7:]
