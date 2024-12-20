@@ -9,6 +9,7 @@ import random
 from src.constants import ui_texts
 from src.sql_database import RSLmysql
 
+ex_time = []
 connected_users = []
 telebot_api = '7828918234:AAHANMlaM2a2hBUyiL1b8k899N5Ho65yyDQ'
 telebot_name = 'rsl_exercise_teacher_helper_bot'
@@ -62,6 +63,7 @@ while started:
         
         if request.text == '/end':
             responseQueue.put(TelebotResponse(chat=request.chat, text=ui_texts['end_text']))
+            print(f'mean ex time:{sum(ex_time)/len(ex_time)}')
 
         if request.text == '/user_file':
             responseQueue.put(TelebotResponse(chat=request.chat, text=ui_texts['get_user_text']))
@@ -86,6 +88,7 @@ while started:
             responseQueue.put(TelebotResponse(chat=request.chat, text=ui_texts['choose_ex'], commands=choose_exercise_buttons))
 
         if request.text.startswith('/ex'): 
+            start_time = time.time()
             responseQueue.put(TelebotResponse(chat=request.chat, text=ui_texts['ex_is_being_generated']))
 
             sentences = sent_tokenize(text)
@@ -106,5 +109,6 @@ while started:
             #ex, answers = exercise.form_exercises()
             responseQueue.put(TelebotResponse(chat=request.chat, text=ex))
             responseQueue.put(TelebotResponse(chat=request.chat, text=ui_texts['more_tasks'], commands=[{'command_text': 'да', 'command_name': '/choose_ex'}, {'command_text': 'нет', 'command_name': '/another_text'}]))
-           
+            end = time.time()
+            ex_time.append(end-start_time)
     time.sleep(0.5)

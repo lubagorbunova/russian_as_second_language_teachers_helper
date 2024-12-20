@@ -6,6 +6,7 @@ from numpy import dot
 import heapq
 from pymorphy2 import MorphAnalyzer
 from navec import Navec
+from memory_profiler import profile
 
 from src.constants import most_frequent_nouns, PROJECT_ROOT
 from src.sentence_processor import SentProcessor
@@ -49,6 +50,7 @@ class Exercise:
             res = self.find_collocations(self.number_of_sent_in_each_ex)
         return res
 
+    @profile
     @beautiful_task
     def generate_scrambled_sentence(self) -> None:
         """
@@ -61,9 +63,9 @@ class Exercise:
         random.shuffle(lemmas)
 
         lemmatized_tokens = ', '.join(lemma for lemma in lemmas)
-        
         return lemmatized_tokens, sentence.get_raw_text(), ex_number, self.tasks[ex_number]
-
+   
+    @profile
     @beautiful_task
     def generate_case_exercise(self) -> None:
         """
@@ -75,35 +77,36 @@ class Exercise:
         noun_gen = self.noun_generator(sentence_tokens)
         noun_candidates = [item for item in noun_gen]
 
-        if not noun_candidates:
-            self.case_ex = "В данном предложении нет существительных."
+        if noun_candidates:
+            
+            random.shuffle(sentence_tokens)
 
-        random.shuffle(sentence_tokens)
+            selected_noun = random.choice(noun_candidates)
+            selected_noun_upper = selected_noun.upper()
 
-        selected_noun = random.choice(noun_candidates)
-        selected_noun_upper = selected_noun.upper()
+            raw_random_sentence = random_sentence.get_raw_text()
 
-        raw_random_sentence = random_sentence.get_raw_text()
+            cases_dict = {
+                'nomn': 'Именительный',
+                'gent': 'Родительный',
+                'datv': 'Дательный',
+                'accs': 'Винительный',
+                'ablt': 'Творительный',
+                'loct': 'Предложный'
+            }
 
-        cases_dict = {
-            'nomn': 'Именительный',
-            'gent': 'Родительный',
-            'datv': 'Дательный',
-            'accs': 'Винительный',
-            'ablt': 'Творительный',
-            'loct': 'Предложный'
-        }
+            correct_case_abbr = self._morph_analyzer.parse(selected_noun)[0].tag.case
+            correct_case = cases_dict.get(correct_case_abbr)
 
-        correct_case_abbr = self._morph_analyzer.parse(selected_noun)[0].tag.case
-        correct_case = cases_dict.get(correct_case_abbr)
+            exercise_task = f"'{selected_noun_upper}' в предложении '{raw_random_sentence}':\n"
 
-        exercise_task = f"'{selected_noun_upper}' в предложении '{raw_random_sentence}':\n"
+            for case_num, case_abbr in enumerate(cases_dict, start=1):
+                exercise_task += f"{case_num}. {cases_dict[case_abbr]}\n"
 
-        for case_num, case_abbr in enumerate(cases_dict, start=1):
-            exercise_task += f"{case_num}. {cases_dict[case_abbr]}\n"
+            return exercise_task, correct_case, ex_number, self.tasks[ex_number]
+        return '', '', ex_number, self.tasks[ex_number]
 
-        return exercise_task, correct_case, ex_number, self.tasks[ex_number]
-
+    @profile
     @beautiful_task
     def select_grammatical_form(self, number_of_sent) -> None:
         """
@@ -151,6 +154,7 @@ class Exercise:
 
         return text, full_text, ex_number, self.tasks[ex_number]
 
+    @profile
     @beautiful_task
     def find_collocations(self, number_sent) -> None:
         """
