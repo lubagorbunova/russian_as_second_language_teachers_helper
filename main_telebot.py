@@ -101,9 +101,9 @@ while started:
                 processed_sentences.append(processed_sent)
 
             exercise = Exercise(processed_sentences, number_of_sent_in_each_ex=3)
-            exercise.run_exercises([int(request.text.replace('/ex', ''))])
-            ex, answers = exercise.form_exercises()
-            responseQueue.put(TelebotResponse(chat=request.chat, text=f'{ex}\n\n{answers}'))
+            ex = exercise.run_exercises([int(request.text.replace('/ex', ''))])
+            #ex, answers = exercise.form_exercises()
+            responseQueue.put(TelebotResponse(chat=request.chat, text=ex))
             responseQueue.put(TelebotResponse(chat=request.chat, text=ui_texts['more_tasks'], commands=[{'command_text': 'да', 'command_name': '/choose_ex'}, {'command_text': 'нет', 'command_name': '/another_text'}]))
            
     time.sleep(0.5)

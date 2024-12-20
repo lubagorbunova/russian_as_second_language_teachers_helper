@@ -21,67 +21,53 @@ class Exercise:
         self._morph_analyzer = MorphAnalyzer()
         self.processed_text = processed_text
         self.number_of_sent_in_each_ex = number_of_sent_in_each_ex
-        self.compose_ex = ''
-        self.compose_answers = ''
-        self.case_ex = ''
-        self.case_answers = ''
-        self.forms_ex = ''
-        self.forms_answers = ''
-        self.lexical_ex = ''
-        self.lexical_answers = ''
+        self.tasks = {1: 'Составьте предложение из слов и поставьте их в правильную форму',
+                      2: 'Выберите правильный падеж для слова',
+                      3: 'Поставьте слово в скобках в правильную форму',
+                      4: 'Выберите одно или несколько слов из списка, которые подходят в предложение по смыслу.\nПоставьте слово в правильную форму'}
 
-    def run_exercises(self, ex_list=None) -> None:
+    def beautiful_task(func):
+        def wrapper(self, *arg, **kw):
+            ex, answ, ex_n, task = func(self, *arg, **kw)
+            modified_result = f'\nЗадание №{ex_n}. {task}:\n{ex}\n\nОтветы на задание {ex_n}:\n{answ}\n'
+            return modified_result
+        return wrapper
+
+    def run_exercises(self, ex_list=None) -> str:
         """
         Запускает скрипт создания всех упражнений.
         """
-        if ex_list is None:
-            ex_list = [1, 2, 3, 4]
         if 1 in ex_list:
-            self.generate_scrambled_sentence()
+            res = self.generate_scrambled_sentence()
         if 2 in ex_list:
-            self.generate_case_exercise()
+            res = self.generate_case_exercise()
         if 3 in ex_list:
-            self.select_grammatical_form(self.number_of_sent_in_each_ex)
+            res = self.select_grammatical_form(self.number_of_sent_in_each_ex)
         if 4 in ex_list:
-            self.find_collocations(self.number_of_sent_in_each_ex)
+            res = self.find_collocations(self.number_of_sent_in_each_ex)
+        return res
 
-    def form_exercises(self) -> tuple[str, str]:
-        '''
-        Объединяет все упражнения в один файл.
-        '''
-        all_exercises = (self.compose_ex +
-                         self.case_ex +
-                         self.forms_ex +
-                         self.lexical_ex)
-        all_answers = (self.compose_answers +
-                       self.case_answers +
-                       self.forms_answers +
-                       self.lexical_answers)
-        if len(all_exercises) == 0 or len(all_answers) == 0:
-            raise NothingToWriteError
-        return all_exercises, all_answers
-
+    @beautiful_task
     def generate_scrambled_sentence(self) -> None:
         """
         Генерирует упражнение на составление предложения из лемм.
         """
+        ex_number = 1
+
         sentence = random.choice(self.processed_text)
         lemmas = sentence.get_lemmas()
         random.shuffle(lemmas)
 
         lemmatized_tokens = ', '.join(f'[{lemma}]' for lemma in lemmas)
+        
+        return lemmatized_tokens, sentence.get_raw_text(), ex_number, self.tasks[ex_number]
 
-        exercise_task = f"\nЗадание №1. Составьте предложение из слов и поставьте их в правильную форму:\n{lemmatized_tokens}\n"
-
-        full_text = f'\nОтветы на задание №1:\n{sentence.get_raw_text()}\n'
-
-        self.compose_ex = exercise_task
-        self.compose_answers = full_text
-
+    @beautiful_task
     def generate_case_exercise(self) -> None:
         """
         Генерирует упражнение на определение падежа существительного в предложении.
         """
+        ex_number = 2
         random_sentence = random.choice(self.processed_text)
         sentence_tokens = list(random_sentence.get_tokens())
 
@@ -109,26 +95,25 @@ class Exercise:
         correct_case_abbr = self._morph_analyzer.parse(selected_noun)[0].tag.case
         correct_case = cases_dict.get(correct_case_abbr)
 
-        exercise_task = f"\nЗадание №2: Выберите правильный падеж для слова '{selected_noun_upper}' в предложении '{raw_random_sentence}':\n"
+        exercise_task = f"'{selected_noun_upper}' в предложении '{raw_random_sentence}':\n"
 
         for case_num, case_abbr in enumerate(cases_dict, start=1):
             exercise_task += f"{case_num}. {cases_dict[case_abbr]}\n"
 
-        full_text = f"\nОтветы на задание №2:\nПравильный ответ: {correct_case}\n"
+        return exercise_task, correct_case, ex_number, self.tasks[ex_number]
 
-        self.case_ex = exercise_task
-        self.case_answers = full_text
-
+    @beautiful_task
     def select_grammatical_form(self, number_of_sent) -> None:
         """
         Генерирует упражнение на выбор правильной формы слова.
         """
+        ex_number = 3
         if len(self.processed_text) < 5:
             number_of_sent = len(self.processed_text)
 
         sentences = random.sample(self.processed_text, number_of_sent)
-        full_text = '\nОтветы на задание №3: \n'
-        text = '\nЗадание №3: Поставьте слово в скобках в правильную форму:\n'
+        full_text = ''
+        text = ''
 
         for sent in sentences:
             sent_text = sent.get_raw_text()
@@ -159,19 +144,20 @@ class Exercise:
 
             text += sent_text + '\n'
 
-        self.forms_ex = text
-        self.forms_answers = full_text
+        return text, full_text, ex_number, self.tasks[ex_number]
 
+    @beautiful_task
     def find_collocations(self, number_sent) -> None:
         """
         Генерирует упражнение на поиск коллокаций для предложенных слов.
         """
+        ex_number = 4
         if len(self.processed_text) < 5:
             number_sent = len(self.processed_text)
 
         sentences = random.sample(self.processed_text, number_sent)
-        full_text = '\nОтветы на задание №4:'
-        text = '\nЗадание №4: Выберите одно или несколько слов из списка, которые подходят в предложение по смыслу.\nПоставьте слово в правильную форму.\n'
+        full_text = ''
+        text = ''
         path = PROJECT_ROOT / 'src' / 'navec_hudlit_v1_12B_500K_300d_100q.tar'
         navec = Navec.load(path)
 
@@ -217,3 +203,4 @@ class Exercise:
 
         self.lexical_ex = text
         self.lexical_answers = full_text
+        return text, full_text, ex_number, self.tasks[ex_number]
