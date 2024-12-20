@@ -72,8 +72,8 @@ class Exercise:
         ex_number = 2
         random_sentence = random.choice(self.processed_text)
         sentence_tokens = list(random_sentence.get_tokens())
-
-        noun_candidates = [word for word in sentence_tokens if 'NOUN' in self._morph_analyzer.parse(word)[0].tag]
+        noun_gen = self.noun_generator(sentence_tokens)
+        noun_candidates = [item for item in noun_gen]
 
         if not noun_candidates:
             self.case_ex = "В данном предложении нет существительных."
@@ -213,6 +213,11 @@ class Exercise:
         self.lexical_answers = full_text
         return text, full_text, ex_number, self.tasks[ex_number]
 
+    def noun_generator(self, seq):
+        for word in seq:
+            if 'NOUN' in self._morph_analyzer.parse(word)[0].tag:
+                yield word
+
 
 class LimitedSequenceIterator:
     def __init__(self, sequence, limit):
@@ -232,3 +237,5 @@ class LimitedSequenceIterator:
         self.index += self.step
         self.count += 1
         return value
+    
+
